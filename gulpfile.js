@@ -11,6 +11,10 @@ var gulp = require('gulp'),
     uncss = require('gulp-uncss'),
     csso = require('gulp-csso'),
 
+    postcss = require('gulp-postcss'),
+    autoprefixer = require('autoprefixer'),
+    precss = require ('precss');
+
 
 
     path = {
@@ -64,13 +68,19 @@ gulp.task('jade', function() {
 //css
 
 gulp.task('css', function () {
+    var processors = [
+        autoprefixer,
+        precss
+    ];
+
     gulp.src(path.src.css)
-        .pipe(sourcemaps.init())
-        .pipe(concatCss('style.css'))
-        //.pipe(uncss({html: ['dev/**/*.html']}))
+        .pipe(postcss(processors))
         .pipe(minifyCss({
             keepSpecialComments: '0'
         }))
+        .pipe(sourcemaps.init())
+        .pipe(concatCss('style.css'))
+        //.pipe(uncss({html: ['dev/**/*.html']}))
         .pipe(cssbeautify())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('dev/'))
