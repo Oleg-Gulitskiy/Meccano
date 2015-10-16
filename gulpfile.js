@@ -17,33 +17,33 @@ var gulp = require('gulp'),
 
 
 
-    path = {
-        src: {
-            jade: 'src/*.jade',
-            css: 'src/**/*.css',
-            js: 'src/js',
-            img: 'src/img',
-            fonts: 'src/fonts'
-        },
-
-        watch: {
-            jade: 'src/**/*.jade',
-            css: 'src/**/*.css',
-            js: 'src/js',
-            img: 'src/img',
-            fonts: 'src/fonts'
-        },
-
-        dev: {
-            html: './dev',
-            css: 'dev/css',
-            js: 'dev/js',
-            img: 'dev/img',
-            fonts: 'dev/fonts'
-        }
-
-
+path = {
+    src: {
+        jade: 'src/*.jade',
+        css: 'src/**/*.css',
+        js: 'src/js',
+        img: 'src/img',
+        fonts: 'src/fonts'
     },
+
+    watch: {
+        jade: 'src/**/*.jade',
+        css: 'src/**/*.css',
+        js: 'src/js',
+        img: 'src/img',
+        fonts: 'src/fonts'
+    },
+
+    dev: {
+        html: './dev',
+        css: 'dev/css',
+        js: 'dev/js',
+        img: 'dev/img',
+        fonts: 'dev/fonts'
+    }
+
+
+},
 
     config = {
         server: {
@@ -61,6 +61,7 @@ var gulp = require('gulp'),
 gulp.task('jade', function() {
     gulp.src(path.src.jade)
         .pipe(jade({pretty: true}))
+
         .pipe(gulp.dest(path.dev.html))
         .pipe(reload({stream: true}));
 });
@@ -74,15 +75,15 @@ gulp.task('css', function () {
     ];
 
     gulp.src(path.src.css)
-        .pipe(postcss(processors))
-        .pipe(minifyCss({
-            keepSpecialComments: '0'
-        }))
-        .pipe(sourcemaps.init())
+
+        //.pipe(minifyCss({
+        //    keepSpecialComments: '0'
+        //}))
         .pipe(concatCss('style.css'))
         //.pipe(uncss({html: ['dev/**/*.html']}))
+        .pipe(postcss(processors))
         .pipe(cssbeautify())
-        .pipe(sourcemaps.write())
+
         .pipe(gulp.dest('dev/'))
         .pipe(reload({stream: true}));
 });
