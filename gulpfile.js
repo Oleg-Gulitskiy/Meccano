@@ -7,13 +7,14 @@ var gulp = require('gulp'),
 
     minifyCss = require('gulp-minify-css'),
     cssbeautify = require('gulp-cssbeautify'),
-    concatCss = require('gulp-concat-css'),
+    concat = require('gulp-concat'),
     uncss = require('gulp-uncss'),
     csso = require('gulp-csso'),
 
     postcss = require('gulp-postcss'),
     autoprefixer = require('autoprefixer'),
-    precss = require ('precss');
+    precss = require ('precss'),
+    postcssExtend = require('postcss-extend');
 
 
 
@@ -35,11 +36,11 @@ path = {
     },
 
     dev: {
-        html: './dev',
-        css: 'dev/css',
-        js: 'dev/js',
-        img: 'dev/img',
-        fonts: 'dev/fonts'
+        html: '../',
+        css: '../',
+        js: '../js',
+        img: '../img',
+        fonts: '../fonts'
     }
 
 
@@ -47,9 +48,9 @@ path = {
 
     config = {
         server: {
-            baseDir: "./dev"
+            baseDir: "../"
         },
-        tunnel: true,
+        tunnel: false,
         host: 'localhost',
         port: 3000,
         logPrefix: "dev"
@@ -71,7 +72,7 @@ gulp.task('jade', function() {
 gulp.task('css', function () {
     var processors = [
         autoprefixer,
-        precss
+        postcssExtend
     ];
 
     gulp.src(path.src.css)
@@ -79,12 +80,11 @@ gulp.task('css', function () {
         //.pipe(minifyCss({
         //    keepSpecialComments: '0'
         //}))
-        .pipe(concatCss('style.css'))
-        //.pipe(uncss({html: ['dev/**/*.html']}))
+        .pipe(concat('style.css'))
         .pipe(postcss(processors))
         .pipe(cssbeautify())
 
-        .pipe(gulp.dest('dev/'))
+        .pipe(gulp.dest(path.dev.css))
         .pipe(reload({stream: true}));
 });
 
