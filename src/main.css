@@ -1,3 +1,13 @@
 span {
     color: #000066;
 }
+
+section {
+    lost-center: 980px;
+    lost-utility: clearfix;
+    lost-utility: edit;
+}
+
+div {
+    lost-column: 1/2;
+}

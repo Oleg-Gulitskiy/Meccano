@@ -11,10 +11,12 @@ var gulp = require('gulp'),
     uncss = require('gulp-uncss'),
     csso = require('gulp-csso'),
 
+
     postcss = require('gulp-postcss'),
     autoprefixer = require('autoprefixer'),
     precss = require ('precss'),
-    postcssExtend = require('postcss-extend');
+    postcssExtend = require('postcss-extend'),
+    lost = require('lost');
 
 
 
@@ -46,15 +48,15 @@ path = {
 
 },
 
-    config = {
-        server: {
-            baseDir: "../"
-        },
-        tunnel: false,
-        host: 'localhost',
-        port: 3000,
-        logPrefix: "dev"
-    };
+config = {
+    server: {
+        baseDir: "../"
+    },
+    tunnel: false,
+    host: 'localhost',
+    port: 3000,
+    logPrefix: "dev"
+};
 
 
 //jade
@@ -62,7 +64,6 @@ path = {
 gulp.task('jade', function() {
     gulp.src(path.src.jade)
         .pipe(jade({pretty: true}))
-
         .pipe(gulp.dest(path.dev.html))
         .pipe(reload({stream: true}));
 });
@@ -71,6 +72,7 @@ gulp.task('jade', function() {
 
 gulp.task('css', function () {
     var processors = [
+        lost(),
         autoprefixer,
         postcssExtend
     ];
