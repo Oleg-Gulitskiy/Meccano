@@ -92,9 +92,9 @@ gulp.task('css', function () {
 
 //js
 
-//gulp.task('js', function () {
-//    gulp.src(path.src.js)
-//});
+gulp.task('js', function () {
+    gulp.src(path.src.js)
+});
 
 //dev
 
