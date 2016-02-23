@@ -45,16 +45,6 @@ path = {
         img: '../img',
         fonts: '../fonts'
     }
-},
-
-config = {
-    server: {
-        baseDir: "../"
-    },
-    tunnel: false,
-    host: 'localhost',
-    port: 3000,
-    logPrefix: "dev"
 };
 
 
@@ -100,9 +90,33 @@ gulp.task('js', function () {
 
 gulp.task('dev', ['jade', 'css', 'js']);
 
-//browser-sync
+//serverLocal
 
-gulp.task('server', function() {
+gulp.task('serverLocal', function() {
+    var config = {
+        server: {
+            baseDir: "../"
+        },
+        tunnel: false,
+        host: 'localhost',
+        port: 3000,
+        logPrefix: "dev"
+    };
+    browserSync(config);
+});
+
+//serverShare
+
+gulp.task('serverShare', function() {
+    var config = {
+        server: {
+            baseDir: "../"
+        },
+        tunnel: true,
+        host: 'localhost',
+        port: 3000,
+        logPrefix: "dev"
+    };
     browserSync(config);
 });
 
@@ -125,4 +139,8 @@ gulp.task('watch', function() {
 
 //default
 
-gulp.task('default', ['dev', 'server', 'watch']);
+gulp.task('default', ['dev', 'serverLocal', 'watch']);
+
+//share
+
+gulp.task('share', ['dev', 'serverShare', 'watch']);
