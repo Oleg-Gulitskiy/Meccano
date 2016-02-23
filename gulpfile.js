@@ -16,7 +16,9 @@ var gulp = require('gulp'),
     autoprefixer = require('autoprefixer'),
     precss = require ('precss'),
     postcssExtend = require('postcss-extend'),
-    lost = require('lost');
+    lost = require('lost'),
+
+    rigger = require('gulp-rigger');
 
 
 
@@ -24,7 +26,7 @@ path = {
     src: {
         jade: 'src/*.jade',
         css: 'src/**/*.css',
-        js: 'src/js',
+        js: 'src/main.js',
         img: 'src/img',
         fonts: 'src/fonts'
     },
@@ -32,20 +34,18 @@ path = {
     watch: {
         jade: 'src/**/*.jade',
         css: 'src/**/*.css',
-        js: 'src/js',
+        js: 'src/**/*.js',
         img: 'src/img',
         fonts: 'src/fonts'
     },
 
-    dev: {
+    bld: {
         html: '../',
         css: '../',
-        js: '../js',
+        js: '../',
         img: '../img',
         fonts: '../fonts'
     }
-
-
 },
 
 config = {
@@ -64,7 +64,7 @@ config = {
 gulp.task('jade', function() {
     gulp.src(path.src.jade)
         .pipe(jade({pretty: true}))
-        .pipe(gulp.dest(path.dev.html))
+        .pipe(gulp.dest(path.bld.html))
         .pipe(reload({stream: true}));
 });
 
@@ -86,7 +86,7 @@ gulp.task('css', function () {
         .pipe(postcss(processors))
         .pipe(cssbeautify())
 
-        .pipe(gulp.dest(path.dev.css))
+        .pipe(gulp.dest(path.bld.css))
         .pipe(reload({stream: true}));
 });
 
@@ -94,11 +94,14 @@ gulp.task('css', function () {
 
 gulp.task('js', function () {
     gulp.src(path.src.js)
+        .pipe(rigger())
+        .pipe(gulp.dest(path.bld.js))
+        .pipe(reload({stream: true}));
 });
 
 //dev
 
-gulp.task('dev', ['jade', 'css']);
+gulp.task('dev', ['jade', 'css', 'js']);
 
 //browser-sync
 
@@ -115,6 +118,10 @@ gulp.task('watch', function() {
 
     watch(path.watch.css, function(event, cb) {
         gulp.start('css');
+    });
+
+    watch(path.watch.js, function(event, cb) {
+        gulp.start('js');
     });
 });
 
