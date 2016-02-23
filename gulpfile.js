@@ -7,7 +7,6 @@ var gulp = require('gulp'),
 
     minifyCss = require('gulp-minify-css'),
     cssbeautify = require('gulp-cssbeautify'),
-    concat = require('gulp-concat'),
     uncss = require('gulp-uncss'),
     csso = require('gulp-csso'),
 
@@ -25,8 +24,8 @@ var gulp = require('gulp'),
 path = {
     src: {
         jade: 'src/*.jade',
-        css: 'src/**/*.css',
-        js: 'src/main.js',
+        css: 'src/style.css',
+        js: 'src/script.js',
         img: 'src/img',
         fonts: 'src/fonts'
     },
@@ -79,10 +78,8 @@ gulp.task('css', function () {
 
     gulp.src(path.src.css)
 
-        //.pipe(minifyCss({
-        //    keepSpecialComments: '0'
-        //}))
-        .pipe(concat('style.css'))
+        .pipe(rigger())
+
         .pipe(postcss(processors))
         .pipe(cssbeautify())
 
