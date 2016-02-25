@@ -4,9 +4,7 @@ var gulp = require('gulp'),
     watch = require('gulp-watch'),
     reload = browserSync.reload,
     sourcemaps = require('gulp-sourcemaps'),
-
-    minifyCss = require('gulp-minify-css'),
-    cssbeautify = require('gulp-cssbeautify'),
+    uglify = require('gulp-uglify'),
     uncss = require('gulp-uncss'),
     csso = require('gulp-csso'),
 
@@ -17,7 +15,10 @@ var gulp = require('gulp'),
     postcssExtend = require('postcss-extend'),
     lost = require('lost'),
 
-    rigger = require('gulp-rigger');
+    rimraf = require('rimraf'),
+    rigger = require('gulp-rigger'),
+    imagemin = require('gulp-imagemin'),
+    pngquant = require('imagemin-pngquant');
 
 
 
@@ -26,7 +27,7 @@ path = {
         jade: 'src/*.jade',
         css: 'src/style.css',
         js: 'src/script.js',
-        img: 'src/img',
+        img: 'src/3_img/**/*.*',
         fonts: 'src/fonts'
     },
 
@@ -34,15 +35,15 @@ path = {
         jade: 'src/**/*.jade',
         css: 'src/**/*.css',
         js: 'src/**/*.js',
-        img: 'src/img',
-        fonts: 'src/fonts'
+        img: 'src/3_img/**/*.*',
+        fonts: 'src/fonts/'
     },
 
     bld: {
-        html: '../',
+        jade: '../',
         css: '../',
         js: '../',
-        img: '../img',
+        img: '../img/',
         fonts: '../fonts'
     }
 };
@@ -50,45 +51,96 @@ path = {
 
 //jade
 
-gulp.task('jade', function() {
+gulp.task('jade', function(cb) {
+    rimraf(path.bld.jade, cb);
     gulp.src(path.src.jade)
         .pipe(jade({pretty: true}))
-        .pipe(gulp.dest(path.bld.html))
+        .pipe(gulp.dest(path.bld.jade))
+        .pipe(reload({stream: true}));
+});
+
+//jadeBld
+
+gulp.task('jadeBld', function(cb) {
+    rimraf(path.bld.jade, cb);
+    gulp.src(path.src.jade)
+        .pipe(jade({pretty: true}))
+        .pipe(gulp.dest(path.bld.jade))
         .pipe(reload({stream: true}));
 });
 
 //css
 
-gulp.task('css', function () {
+gulp.task('css', function (cb) {
     var processors = [
+        postcssExtend,
         lost(),
-        autoprefixer,
-        postcssExtend
+        autoprefixer
     ];
-
+    rimraf(path.bld.css, cb);
     gulp.src(path.src.css)
-
         .pipe(rigger())
-
         .pipe(postcss(processors))
-        .pipe(cssbeautify())
+        .pipe(gulp.dest(path.bld.css))
+        .pipe(reload({stream: true}));
+});
 
+//cssBld
+
+gulp.task('cssBld', function (cb) {
+    var processors = [
+        postcssExtend,
+        lost(),
+        autoprefixer
+    ];
+    rimraf(path.bld.css, cb);
+    gulp.src(path.src.css)
+        .pipe(rigger())
+        .pipe(postcss(processors))
         .pipe(gulp.dest(path.bld.css))
         .pipe(reload({stream: true}));
 });
 
 //js
 
-gulp.task('js', function () {
+gulp.task('js', function (cb) {
+    rimraf(path.bld.js, cb);
     gulp.src(path.src.js)
         .pipe(rigger())
         .pipe(gulp.dest(path.bld.js))
         .pipe(reload({stream: true}));
 });
 
-//dev
 
-gulp.task('dev', ['jade', 'css', 'js']);
+//jsBld
+
+gulp.task('jsBld', function (cb) {
+    rimraf(path.bld.js, cb);
+    gulp.src(path.src.js)
+        .pipe(rigger())
+        .pipe(sourcemaps.init())
+        .pipe(uglify())
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest(path.bld.js))
+        .pipe(reload({stream: true}));
+});
+
+//img
+
+gulp.task('img', function (cb) {
+    rimraf(path.bld.img, cb);
+    gulp.src(path.src.img)
+        .pipe(imagemin({
+            optimizationLevel: 5,
+            progressive: true,
+            interlaced: true,
+            use: [pngquant()]
+            }))
+        .pipe(gulp.dest(path.bld.img))
+        .pipe(reload({stream: true}));
+});
+
+gulp.task('dev', ['jade', 'css', 'js', 'img']);
 
 //serverLocal
 
@@ -134,6 +186,10 @@ gulp.task('watch', function() {
     watch(path.watch.js, function(event, cb) {
         gulp.start('js');
     });
+
+    watch(path.watch.img, function(event, cb) {
+        gulp.start('img');
+    });
 });
 
 
@@ -144,3 +200,7 @@ gulp.task('default', ['dev', 'serverLocal', 'watch']);
 //share
 
 gulp.task('share', ['dev', 'serverShare', 'watch']);
+
+//bld
+
+gulp.task('bld', ['jadeBld', 'cssBld', 'jsBld', 'serverLocal', 'watch']);
