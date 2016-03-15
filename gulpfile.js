@@ -7,8 +7,8 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     uncss = require('gulp-uncss'),
     csso = require('gulp-csso'),
-
-
+    replace = require('gulp-replace'),
+    rename = require('gulp-rename')
     postcss = require('gulp-postcss'),
     autoprefixer = require('autoprefixer'),
     precss = require ('precss'),
@@ -18,7 +18,10 @@ var gulp = require('gulp'),
     rimraf = require('rimraf'),
     rigger = require('gulp-rigger'),
     imagemin = require('gulp-imagemin'),
-    pngquant = require('imagemin-pngquant');
+    pngquant = require('imagemin-pngquant'),
+    svgStore = require('gulp-svgstore'),
+    svgmin = require('gulp-svgmin'),
+    cheerio = require('gulp-cheerio');
 
 
 
@@ -28,6 +31,7 @@ path = {
         css: 'src/style.css',
         js: 'src/script.js',
         img: 'src/3_img/**/*.*',
+        svg: 'src/4_svg/**/*.svg',
         fonts: 'src/fonts'
     },
 
@@ -36,6 +40,7 @@ path = {
         css: 'src/**/*.css',
         js: 'src/**/*.js',
         img: 'src/3_img/**/*.*',
+        svg: 'src/4_svg/**/*.svg',
         fonts: 'src/fonts/'
     },
 
@@ -44,6 +49,16 @@ path = {
         css: '../',
         js: '../',
         img: '../img/',
+        svg: 'src/4_svg/',
+        fonts: '../fonts'
+    },
+
+    del: {
+        jade: '../*.html',
+        css: '../style.css',
+        js: '../script.js',
+        img: '../img/',
+        svg: 'src/4_svg/svgSprite.html',
         fonts: '../fonts'
     }
 };
@@ -52,17 +67,7 @@ path = {
 //jade
 
 gulp.task('jade', function(cb) {
-    rimraf(path.bld.jade, cb);
-    gulp.src(path.src.jade)
-        .pipe(jade({pretty: true}))
-        .pipe(gulp.dest(path.bld.jade))
-        .pipe(reload({stream: true}));
-});
-
-//jadeBld
-
-gulp.task('jadeBld', function(cb) {
-    rimraf(path.bld.jade, cb);
+    rimraf(path.del.jade, cb);
     gulp.src(path.src.jade)
         .pipe(jade({pretty: true}))
         .pipe(gulp.dest(path.bld.jade))
@@ -77,23 +82,7 @@ gulp.task('css', function (cb) {
         lost(),
         autoprefixer
     ];
-    rimraf(path.bld.css, cb);
-    gulp.src(path.src.css)
-        .pipe(rigger())
-        .pipe(postcss(processors))
-        .pipe(gulp.dest(path.bld.css))
-        .pipe(reload({stream: true}));
-});
-
-//cssBld
-
-gulp.task('cssBld', function (cb) {
-    var processors = [
-        postcssExtend,
-        lost(),
-        autoprefixer
-    ];
-    rimraf(path.bld.css, cb);
+    rimraf(path.del.css, cb);
     gulp.src(path.src.css)
         .pipe(rigger())
         .pipe(postcss(processors))
@@ -104,18 +93,17 @@ gulp.task('cssBld', function (cb) {
 //js
 
 gulp.task('js', function (cb) {
-    rimraf(path.bld.js, cb);
+    rimraf(path.del.js, cb);
     gulp.src(path.src.js)
         .pipe(rigger())
         .pipe(gulp.dest(path.bld.js))
         .pipe(reload({stream: true}));
 });
 
-
 //jsBld
 
 gulp.task('jsBld', function (cb) {
-    rimraf(path.bld.js, cb);
+    rimraf(path.del.js, cb);
     gulp.src(path.src.js)
         .pipe(rigger())
         .pipe(sourcemaps.init())
@@ -128,7 +116,7 @@ gulp.task('jsBld', function (cb) {
 //img
 
 gulp.task('img', function (cb) {
-    rimraf(path.bld.img, cb);
+    rimraf(path.del.img, cb);
     gulp.src(path.src.img)
         .pipe(imagemin({
             optimizationLevel: 5,
@@ -140,7 +128,35 @@ gulp.task('img', function (cb) {
         .pipe(reload({stream: true}));
 });
 
-gulp.task('dev', ['jade', 'css', 'js', 'img']);
+//svg
+
+gulp.task('svg', function() {
+    gulp.src(path.src.svg)
+        .pipe(svgmin({
+            js2svg: {
+                pretty: true
+            }
+        }))
+        .pipe(cheerio({
+            run: function ($) {
+                $('[fill]').removeAttr('fill');
+                $('[style]').removeAttr('style');
+            },
+            parserOptions: { xmlMode: true }
+        }))
+        .pipe(replace('&gt;', '>'))
+        .pipe(svgStore({
+            inlineSvg: true
+        }))
+        .pipe(replace('svg xmlns="http://www.w3.org/2000/svg"',
+            'svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" style="position:absolute"'))
+        .pipe(rename('svgSprite.html'))
+        .pipe(gulp.dest(path.bld.svg));
+});
+
+//dev
+
+gulp.task('dev', ['jade', 'css', 'js', 'img', 'svg']);
 
 //serverLocal
 
@@ -175,20 +191,24 @@ gulp.task('serverShare', function() {
 //watch
 
 gulp.task('watch', function() {
-    watch(path.watch.jade, function(event, cb) {
+    watch(path.watch.jade, function() {
         gulp.start('jade');
     });
 
-    watch(path.watch.css, function(event, cb) {
+    watch(path.watch.css, function() {
         gulp.start('css');
     });
 
-    watch(path.watch.js, function(event, cb) {
+    watch(path.watch.js, function() {
         gulp.start('js');
     });
 
-    watch(path.watch.img, function(event, cb) {
+    watch(path.watch.img, function() {
         gulp.start('img');
+    });
+
+    watch(path.watch.svg, function() {
+        gulp.start('svg');
     });
 });
 
@@ -203,4 +223,4 @@ gulp.task('share', ['dev', 'serverShare', 'watch']);
 
 //bld
 
-gulp.task('bld', ['jadeBld', 'cssBld', 'jsBld', 'serverLocal', 'watch']);
+gulp.task('bld', ['jadeBld', 'cssBld', 'jsBld', 'img', 'serverLocal', 'watch']);
