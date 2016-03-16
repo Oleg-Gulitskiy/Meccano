@@ -66,8 +66,7 @@ path = {
 
 //jade
 
-gulp.task('jade', function(cb) {
-    rimraf(path.del.jade, cb);
+gulp.task('jade', function() {
     gulp.src(path.src.jade)
         .pipe(jade({pretty: true}))
         .pipe(gulp.dest(path.bld.jade))
@@ -76,13 +75,12 @@ gulp.task('jade', function(cb) {
 
 //css
 
-gulp.task('css', function (cb) {
+gulp.task('css', function () {
     var processors = [
         postcssExtend,
         lost(),
         autoprefixer
     ];
-    rimraf(path.del.css, cb);
     gulp.src(path.src.css)
         .pipe(rigger())
         .pipe(postcss(processors))
@@ -92,8 +90,7 @@ gulp.task('css', function (cb) {
 
 //js
 
-gulp.task('js', function (cb) {
-    rimraf(path.del.js, cb);
+gulp.task('js', function () {
     gulp.src(path.src.js)
         .pipe(rigger())
         .pipe(gulp.dest(path.bld.js))
@@ -102,8 +99,7 @@ gulp.task('js', function (cb) {
 
 //jsBld
 
-gulp.task('jsBld', function (cb) {
-    rimraf(path.del.js, cb);
+gulp.task('jsBld', function () {
     gulp.src(path.src.js)
         .pipe(rigger())
         .pipe(sourcemaps.init())
